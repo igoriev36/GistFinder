@@ -1,0 +1,27 @@
+FROM node:16.13.1 as build-deps
+
+RUN _="Development Docker File" && echo $_
+WORKDIR /usr/app
+COPY package.json  ./
+RUN npm install 
+
+ADD . ./
+RUN npm run build
+RUN file="$(ls -1 /usr/app)" && echo $file
+
+FROM node:16-alpine3.14
+
+WORKDIR /gistfinder
+COPY --from=build-deps /usr/app/node_modules /gistfinder/node_modules
+COPY --from=build-deps /usr/app/package.json  /gistfinder/package.json
+COPY --from=build-deps /usr/app/package-lock.json /gistfinder/package-lock.json
+COPY --from=build-deps /usr/app/tsconfig.build.json  /gistfinder/tsconfig.build.json
+COPY --from=build-deps /usr/app/dist /gistfinder/dist
+
+# RUN mkdir -p /gistfinder/env
+COPY env  /gistfinder/env
+# RUN cat /gistfinder/env/.env.development
+
+EXPOSE 3000
+
+CMD ["yarn","start:dev"]

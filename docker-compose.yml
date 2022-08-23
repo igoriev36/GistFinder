@@ -1,0 +1,35 @@
+version: '3'
+services:
+    dev:
+        container_name: gistfinder_dev
+        image: nestjs-api-dev:1.0.0
+        environment:
+            NODE_ENV: development
+        build:
+            context: .
+            dockerfile: ./Dockerfile.dev
+        ports:
+            - 3000:3000
+        networks:
+            - nestjs-network
+        volumes:
+            - /tradingbot/node_modules
+            - .:/tradingbot
+        restart: unless-stopped
+    prod:
+        container_name: gistfinder_prod
+        image: nestjs-api-prod:1.0.0
+        environment:
+            NODE_ENV: production
+        build:
+            context: .
+            dockerfile: ./Dockerfile
+        command: npm start
+        ports:
+            - 3000:8080
+        networks:
+            - nestjs-network
+        restart: unless-stopped
+
+networks:
+    nestjs-network:
